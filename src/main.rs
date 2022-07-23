@@ -17,13 +17,15 @@ impl HeadSpaceCount {
     }
 }
 
+type RawNode = (u8, String);
+
 #[derive(Debug, Clone, Copy)]
 enum Status {
     Done,
 }
 
 struct TaskTree {
-    node: Vec<TaskNode>,
+    nodes: Vec<TaskNode>,
 }
 
 #[derive(Debug, Clone)]
@@ -40,7 +42,7 @@ enum TaskNode {
 }
 
 impl TaskNode {
-    fn push_children(self, mut nodes: Vec<TaskNode>) -> Self {
+    fn add_children(self, mut nodes: Vec<TaskNode>) -> Self {
         let node = self;
 
         match node {
@@ -68,31 +70,50 @@ impl TaskNode {
 }
 
 fn main() {
-    let stdin = io::stdin();
-    let mut lines = stdin.lock().lines();
-
-    while let Some(line) = lines.next() {
-        let (spaces, content) = parse_input_line(line.unwrap());
-
-        println!("{}: {}", spaces, content)
-    }
+    let input = read_lines();
+    let raw_nodes = input
+        .iter()
+        .map(|text| parse_line(text.to_owned()))
+        .collect::<Vec<_>>();
+    let tree = gen_tree(raw_nodes);
 }
 
-fn parse_input_line(input: String) -> (u8, String) {
-    let spaces = input.chars().fold(
-        HeadSpaceCount::UntilSpaces(0),
-        |c: HeadSpaceCount, ch| match c {
-            HeadSpaceCount::UntilSpaces(n) if ch.is_ascii_whitespace() => {
-                HeadSpaceCount::UntilSpaces(n + 1)
-            }
-            HeadSpaceCount::UntilSpaces(n) => HeadSpaceCount::ReachedText(n),
-            _ => c,
-        },
-    );
+fn read_lines() -> Vec<String> {
+    let mut lines = io::stdin().lock().lines();
+    let mut read = vec![];
 
-    let content: String = input.chars().skip(spaces.count().into()).collect();
+    while let Some(Ok(text)) = lines.next() {
+        read.push(text);
+    }
 
-    (spaces.count(), content)
+    return read;
+}
+
+fn parse_line(raw_text: String) -> RawNode {
+    let depth = raw_text
+        .chars()
+        .fold(
+            HeadSpaceCount::UntilSpaces(0),
+            |c: HeadSpaceCount, ch| match c {
+                HeadSpaceCount::UntilSpaces(n) if ch.is_ascii_whitespace() => {
+                    HeadSpaceCount::UntilSpaces(n + 1)
+                }
+                HeadSpaceCount::UntilSpaces(n) => HeadSpaceCount::ReachedText(n),
+                _ => c,
+            },
+        )
+        .count();
+
+    let raw_text: String = raw_text.chars().skip(depth.into()).collect();
+
+    return (depth, raw_text);
+}
+
+fn gen_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
+    let mut deque = VecDeque::from(raw_nodes);
+    let nodes = interpret_nodes(0, &mut deque);
+
+    return TaskTree { nodes };
 }
 
 fn interpret_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TaskNode> {
@@ -102,8 +123,8 @@ fn interpret_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec
         match deque.front() {
             Some((depth, _)) if *depth == current_depth => {
                 let text = depth.to_string();
-
                 let (_, _) = deque.pop_front().unwrap();
+
                 nodes.push(TaskNode::Leaf {
                     raw_text: text,
                     status: Status::Done,
@@ -111,7 +132,7 @@ fn interpret_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec
             }
             Some((depth, _)) if *depth == current_depth + 2 => {
                 let children = interpret_nodes(current_depth + 2, deque);
-                let appended = nodes.pop().unwrap().push_children(children);
+                let appended = nodes.pop().unwrap().add_children(children);
 
                 nodes.push(appended);
             }
@@ -126,7 +147,7 @@ mod tests {
 
     #[test]
     fn parse_empty() {
-        let (spaces, content) = parse_input_line("".to_string());
+        let (spaces, content) = parse_line("".to_string());
 
         assert_eq!(spaces, 0);
         assert_eq!(content, "");
@@ -134,7 +155,7 @@ mod tests {
 
     #[test]
     fn parse_tabbed() {
-        let (spaces, content) = parse_input_line("  text".to_string());
+        let (spaces, content) = parse_line("  text".to_string());
 
         assert_eq!(spaces, 2);
         assert_eq!(content, "text");
