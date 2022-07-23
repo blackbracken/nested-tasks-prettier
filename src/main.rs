@@ -1,8 +1,6 @@
 use std::{
     collections::VecDeque,
     io::{self, BufRead},
-    thread::sleep,
-    time::Duration,
 };
 
 enum HeadSpaceCount {
@@ -42,8 +40,9 @@ enum TaskNode {
 }
 
 impl TaskNode {
-    fn add_children(self, nodes: &mut Vec<TaskNode>) -> Self {
+    fn push_children(self, mut nodes: Vec<TaskNode>) -> Self {
         let node = self;
+
         match node {
             TaskNode::Node {
                 raw_text,
@@ -51,7 +50,7 @@ impl TaskNode {
                 children,
             } => {
                 let mut v = children;
-                v.append(nodes);
+                v.append(&mut nodes);
 
                 TaskNode::Node {
                     raw_text,
@@ -96,38 +95,27 @@ fn parse_input_line(input: String) -> (u8, String) {
     (spaces.count(), content)
 }
 
-fn pairs_to_tree(deque: VecDeque<(u8, String)>) -> TaskTree {
-    let mut deque = deque;
-
-    let nodes = f(0, &mut deque);
-    TaskTree { node: nodes }
-}
-
-fn f(current: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TaskNode> {
-    let mut r: Vec<TaskNode> = vec![];
+fn interpret_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TaskNode> {
+    let mut nodes: Vec<TaskNode> = vec![];
 
     loop {
-        let peek = deque.front();
-        println!("[{}] peeked: {:?}", current, peek);
-        match peek {
-            Some((n, _)) if *n == current => {
-                println!("1st {}", n);
-                let text = n.to_string();
+        match deque.front() {
+            Some((depth, _)) if *depth == current_depth => {
+                let text = depth.to_string();
+
                 let (_, _) = deque.pop_front().unwrap();
-                r.push(TaskNode::Leaf {
+                nodes.push(TaskNode::Leaf {
                     raw_text: text,
                     status: Status::Done,
                 });
             }
-            Some((n, _)) if *n == current + 2 => {
-                println!("2nd {}", n);
-                let last = r.pop().unwrap();
-                let mut children = f(current + 2, deque);
-                let last = last.add_children(&mut children);
+            Some((depth, _)) if *depth == current_depth + 2 => {
+                let children = interpret_nodes(current_depth + 2, deque);
+                let appended = nodes.pop().unwrap().push_children(children);
 
-                r.push(last);
+                nodes.push(appended);
             }
-            _ => return r,
+            _ => return nodes,
         }
     }
 }
@@ -163,7 +151,7 @@ mod tests {
             (0, "1".to_owned()),
         ]);
 
-        let x = f(0, &mut v);
+        let x = interpret_nodes(0, &mut v);
 
         println!("{:?}", x);
     }
