@@ -46,4 +46,15 @@ impl TaskNode {
             },
         }
     }
+
+    pub fn children(&self) -> Option<&Vec<TaskNode>> {
+        match self {
+            TaskNode::Node {
+                raw_text: _,
+                status: _,
+                children,
+            } => Some(children),
+            _ => None,
+        }
+    }
 }
