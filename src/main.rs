@@ -19,9 +19,11 @@ fn read_lines() -> Vec<String> {
     let mut lines = io::stdin().lock().lines();
     let mut read = vec![];
 
-    while let Some(Ok(text)) = lines.next() {
-        read.push(text);
+    while let Some(Ok(line)) = lines.next() {
+        read.push(line);
     }
 
-    return read;
+    read.into_iter()
+        .filter(|line| !line.trim().is_empty())
+        .collect()
 }
