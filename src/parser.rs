@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::task::{Status, TaskNode, TaskTree};
+use crate::task::{Status, Task, TaskTree, TreeNode};
 
 pub type RawNode = (u8, String);
 
@@ -38,25 +38,25 @@ pub fn isolate_line(raw_text: String) -> RawNode {
     return (depth, raw_text);
 }
 
-pub fn gen_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
+pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
     let mut deque = VecDeque::from(raw_nodes);
     let nodes = parse_below_nodes(0, &mut deque);
 
     return TaskTree { nodes };
 }
 
-fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TaskNode> {
-    let mut nodes: Vec<TaskNode> = vec![];
+fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TreeNode> {
+    let mut nodes: Vec<TreeNode> = vec![];
 
     loop {
         match deque.front() {
             Some((depth, _)) if *depth == current_depth => {
                 let (_, text) = deque.pop_front().unwrap();
 
-                nodes.push(TaskNode::Leaf {
-                    raw_text: text,
-                    status: Status::Done,
-                });
+                // 多重責務になるのでここで作成しない方が良い
+                let task = make_task(text);
+
+                nodes.push(TreeNode::Leaf { task });
             }
             Some((depth, _)) if *depth == current_depth + 2 => {
                 let children = parse_below_nodes(current_depth + 2, deque);
@@ -66,6 +66,21 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> V
             }
             _ => return nodes,
         }
+    }
+}
+
+fn make_task(raw_text: String) -> Task {
+    let prefix = raw_text.chars().take(4).collect::<String>();
+
+    let status = Status::all()
+        .iter()
+        .find(|s| prefix == format!("-[{}]", s.ascii()))
+        .unwrap()
+        .clone();
+
+    Task {
+        content: raw_text.chars().skip(5).collect(),
+        status,
     }
 }
 
@@ -83,27 +98,43 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
+    #[test_case("-[x] done", 'x')]
+    #[test_case("-[-] pending", '-')]
+    #[test_case("-[>] doing", '>')]
+    #[test_case("-[ ] new", ' ')]
+    fn test_make_task_status_success(text: &str, expected: char) {
+        let status = make_task(text.to_owned()).status;
+
+        assert_eq!(status.ascii(), expected);
+    }
+
     #[test]
-    fn test_gen_tree_empty() {
-        let tree = gen_tree(vec![]);
+    #[should_panic]
+    fn test_make_task_status_failure() {
+        make_task("-[?] unknown".to_owned());
+    }
+
+    #[test]
+    fn test_assemble_tree_empty() {
+        let tree = assemble_tree(vec![]);
 
         assert!(tree.nodes.is_empty());
     }
 
     #[test]
-    fn test_gen_tree_nested() {
+    fn test_assemble_tree_nested() {
         let raw_nodes = vec![
-            (0, "0".to_owned()),
-            (2, "2".to_owned()),
-            (2, "2".to_owned()),
-            (4, "4".to_owned()),
-            (4, "4".to_owned()),
-            (6, "6".to_owned()),
-            (2, "2".to_owned()),
-            (0, "0".to_owned()),
+            (0, "-[ ] 0".to_owned()),
+            (2, "-[ ] 2".to_owned()),
+            (2, "-[ ] 2".to_owned()),
+            (4, "-[ ] 4".to_owned()),
+            (4, "-[ ] 4".to_owned()),
+            (6, "-[ ] 6".to_owned()),
+            (2, "-[ ] 2".to_owned()),
+            (0, "-[ ] 0".to_owned()),
         ];
 
-        let tree = gen_tree(raw_nodes);
+        let tree = assemble_tree(raw_nodes);
 
         let nodes = tree.nodes;
         assert_eq!(nodes.len(), 2);

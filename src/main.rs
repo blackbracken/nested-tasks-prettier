@@ -1,6 +1,6 @@
 use std::io::{self, BufRead};
 
-use nested_tasks_prettier::parser::{gen_tree, isolate_line};
+use nested_tasks_prettier::parser::{assemble_tree, isolate_line};
 
 fn main() {
     let input = read_lines();
@@ -8,7 +8,7 @@ fn main() {
         .iter()
         .map(|text| isolate_line(text.to_owned()))
         .collect::<Vec<_>>();
-    let tree = gen_tree(raw_nodes);
+    let tree = assemble_tree(raw_nodes);
 }
 
 fn read_lines() -> Vec<String> {
