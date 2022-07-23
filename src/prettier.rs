@@ -44,13 +44,13 @@ mod tests {
     #[test]
     fn test_tree_pretty() {
         let raw_nodes = vec![
-            (0, "-[x] 1".to_owned()),
-            (0, "-[x] 2".to_owned()),
-            (2, "-[x] 2-1".to_owned()),
-            (2, "-[-] 2-2".to_owned()),
-            (2, "-[>] 2-3".to_owned()),
-            (4, "-[ ] 2-3-1".to_owned()),
-            (0, "-[>] 3".to_owned()),
+            (0, "- [x] 1".to_owned()),
+            (0, "- [x] 2".to_owned()),
+            (2, "- [x] 2-1".to_owned()),
+            (2, "- [-] 2-2".to_owned()),
+            (2, "- [>] 2-3".to_owned()),
+            (4, "- [ ] 2-3-1".to_owned()),
+            (0, "- [>] 3".to_owned()),
         ];
         let tree = assemble_tree(raw_nodes);
 
@@ -66,7 +66,7 @@ mod tests {
         .split('\n')
         .filter(|line| !line.is_empty())
         .collect::<Vec<_>>();
-        
+
         let actual = tree.pretty();
 
         assert_eq!(expected, actual);

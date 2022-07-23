@@ -70,17 +70,18 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> V
     }
 }
 
+const PREFIX_LENGTH: usize = 5;
 fn make_task(raw_text: String) -> Task {
-    let prefix = raw_text.chars().take(4).collect::<String>();
+    let prefix = raw_text.chars().take(PREFIX_LENGTH).collect::<String>();
 
     let status = Status::all()
         .iter()
-        .find(|s| prefix == format!("-[{}]", s.ascii()))
+        .find(|s| prefix == format!("- [{}]", s.ascii()))
         .unwrap()
         .clone();
 
     Task {
-        content: raw_text.chars().skip(5).collect(),
+        content: raw_text.chars().skip(PREFIX_LENGTH + 1).collect(),
         status,
     }
 }
@@ -99,10 +100,10 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    #[test_case("-[x] done", 'x')]
-    #[test_case("-[-] pending", '-')]
-    #[test_case("-[>] doing", '>')]
-    #[test_case("-[ ] new", ' ')]
+    #[test_case("- [x] done", 'x')]
+    #[test_case("- [-] pending", '-')]
+    #[test_case("- [>] doing", '>')]
+    #[test_case("- [ ] new", ' ')]
     fn test_make_task_status_success(text: &str, expected: char) {
         let status = make_task(text.to_owned()).status;
 
@@ -112,13 +113,13 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_make_task_status_failure() {
-        make_task("-[?] unknown".to_owned());
+        make_task("- [?] unknown".to_owned());
     }
 
-    #[test_case("-[x] aaa", "aaa")]
-    #[test_case("-[x] 1 2 3", "1 2 3")]
+    #[test_case("- [x] aaa", "aaa")]
+    #[test_case("- [x] 1 2 3", "1 2 3")]
     #[test_case(
-        "-[x] 🚧あいうえおかきくけこさしすせそたちつてと",
+        "- [x] 🚧あいうえおかきくけこさしすせそたちつてと",
         "🚧あいうえおかきくけこさしすせそたちつてと"
     )]
     fn test_make_task_content(text: &str, expected: &str) {
@@ -137,14 +138,14 @@ mod tests {
     #[test]
     fn test_assemble_tree_nested() {
         let raw_nodes = vec![
-            (0, "-[ ] 0".to_owned()),
-            (2, "-[ ] 2".to_owned()),
-            (2, "-[ ] 2".to_owned()),
-            (4, "-[ ] 4".to_owned()),
-            (4, "-[ ] 4".to_owned()),
-            (6, "-[ ] 6".to_owned()),
-            (2, "-[ ] 2".to_owned()),
-            (0, "-[ ] 0".to_owned()),
+            (0, "- [ ] 0".to_owned()),
+            (2, "- [ ] 2".to_owned()),
+            (2, "- [ ] 2".to_owned()),
+            (4, "- [ ] 4".to_owned()),
+            (4, "- [ ] 4".to_owned()),
+            (6, "- [ ] 6".to_owned()),
+            (2, "- [ ] 2".to_owned()),
+            (0, "- [ ] 0".to_owned()),
         ];
 
         let tree = assemble_tree(raw_nodes);

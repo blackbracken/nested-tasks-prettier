@@ -10,6 +10,9 @@ fn main() {
         .collect::<Vec<_>>();
 
     let tree = assemble_tree(raw_nodes);
+
+    let output = tree.pretty().join("\n");
+    print!("{}", output);
 }
 
 fn read_lines() -> Vec<String> {
