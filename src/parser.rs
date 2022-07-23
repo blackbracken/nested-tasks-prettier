@@ -51,12 +51,13 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> V
     loop {
         match deque.front() {
             Some((depth, _)) if *depth == current_depth => {
+                let depth = *depth;
                 let (_, text) = deque.pop_front().unwrap();
 
                 // 多重責務になるのでここで作成しない方が良い
                 let task = make_task(text);
 
-                nodes.push(TreeNode::Leaf { task });
+                nodes.push(TreeNode::Leaf { depth, task });
             }
             Some((depth, _)) if *depth == current_depth + 2 => {
                 let children = parse_below_nodes(current_depth + 2, deque);
@@ -154,21 +155,31 @@ mod tests {
         // [0 -> [...], 0]
         //  ^
         let nested = nodes.get(0).unwrap();
+        assert_eq!(nested.depth(), 0);
         assert!(matches!(nested.children(), Some(children) if children.len() == 3));
 
         // [0 -> [2, 2, 2], 0]
         //              ^
         let not_nested = nested.children().unwrap().get(2).unwrap();
+        assert_eq!(not_nested.depth(), 2);
         assert!(matches!(not_nested.children(), None));
 
         // [0 -> [2, 2 -> [...], 2], 0]
         //           ^
         let nested = nested.children().unwrap().get(1).unwrap();
+        assert_eq!(nested.depth(), 2);
         assert!(matches!(nested.children(), Some(children) if children.len() == 2));
 
         // [0 -> [2, 2 -> [4, 4 -> [...]], 2], 0]
         //                    ^
         let nested = nested.children().unwrap().get(1).unwrap();
+        assert_eq!(nested.depth(), 4);
         assert!(matches!(nested.children(), Some(children) if children.len() == 1));
+
+        // [0 -> [2, 2 -> [4, 4 -> [6]], 2], 0]
+        //                          ^
+        let nested = nested.children().unwrap().get(0).unwrap();
+        assert_eq!(nested.depth(), 6);
+        assert!(matches!(nested.children(), None));
     }
 }

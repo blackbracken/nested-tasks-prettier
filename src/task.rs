@@ -42,15 +42,26 @@ pub struct Task {
 
 #[derive(Debug, Clone)]
 pub enum TreeNode {
-    Branch { task: Task, children: Vec<TreeNode> },
-    Leaf { task: Task },
+    Branch {
+        depth: u8,
+        task: Task,
+        children: Vec<TreeNode>,
+    },
+    Leaf {
+        depth: u8,
+        task: Task,
+    },
 }
 
 impl TreeNode {
     pub fn task(&self) -> &Task {
         match self {
-            TreeNode::Branch { task, children: _ } => task,
-            TreeNode::Leaf { task } => task,
+            TreeNode::Branch {
+                depth: _,
+                task,
+                children: _,
+            } => task,
+            TreeNode::Leaf { depth: _, task } => task,
         }
     }
 
@@ -58,13 +69,22 @@ impl TreeNode {
         let node = self;
 
         match node {
-            TreeNode::Branch { task, children } => {
+            TreeNode::Branch {
+                depth,
+                task,
+                children,
+            } => {
                 let mut v = children;
                 v.append(&mut nodes);
 
-                TreeNode::Branch { task, children: v }
+                TreeNode::Branch {
+                    depth,
+                    task,
+                    children: v,
+                }
             }
-            TreeNode::Leaf { task } => TreeNode::Branch {
+            TreeNode::Leaf { depth, task } => TreeNode::Branch {
+                depth,
                 task,
                 children: nodes.clone(),
             },
@@ -73,8 +93,23 @@ impl TreeNode {
 
     pub fn children(&self) -> Option<&Vec<TreeNode>> {
         match self {
-            TreeNode::Branch { task: _, children } => Some(children),
+            TreeNode::Branch {
+                depth: _,
+                task: _,
+                children,
+            } => Some(children),
             _ => None,
+        }
+    }
+
+    pub fn depth(&self) -> u8 {
+        match &self {
+            TreeNode::Branch {
+                depth,
+                task: _,
+                children: _,
+            } => *depth,
+            TreeNode::Leaf { depth, task: _ } => *depth,
         }
     }
 }

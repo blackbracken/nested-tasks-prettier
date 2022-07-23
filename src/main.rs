@@ -8,6 +8,7 @@ fn main() {
         .iter()
         .map(|text| isolate_line(text.to_owned()))
         .collect::<Vec<_>>();
+
     let tree = assemble_tree(raw_nodes);
 }
 
