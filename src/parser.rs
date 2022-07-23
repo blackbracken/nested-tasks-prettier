@@ -114,6 +114,18 @@ mod tests {
         make_task("-[?] unknown".to_owned());
     }
 
+    #[test_case("-[x] aaa", "aaa")]
+    #[test_case("-[x] 1 2 3", "1 2 3")]
+    #[test_case(
+        "-[x] 🚧あいうえおかきくけこさしすせそたちつてと",
+        "🚧あいうえおかきくけこさしすせそたちつてと"
+    )]
+    fn test_make_task_content(text: &str, expected: &str) {
+        let content = make_task(text.to_owned()).content;
+
+        assert_eq!(content, expected)
+    }
+
     #[test]
     fn test_assemble_tree_empty() {
         let tree = assemble_tree(vec![]);
