@@ -2,15 +2,15 @@
 
 [WIP] / A cli tool to pretty checkbox bullets which like markdown notation.
 
-## how to use (C&P)
+## How to use (C&P)
 
 ```shell
 $ pbpaste | ./nested-tasks-prettier | pbcopy
 ```
 
-## example
+## Example
 
-### input
+### Input
 
 ```plain
 - [x] xxxxxx
@@ -20,7 +20,7 @@ $ pbpaste | ./nested-tasks-prettier | pbcopy
 - [ ] zzzzzz
 ```
 
-### output
+### Output
 
 ```plain
 - ✅ xxxxxx
@@ -30,12 +30,14 @@ $ pbpaste | ./nested-tasks-prettier | pbcopy
 - 📦 zzzzzz
 ```
 
-## roadmap
+## Roadmap
 
-- ✅ status emoji
-- 📦 hide items
+- ✅ decorate status emojis
+- 🚧 propose a status change for parent tasks if their child ones have been completed
+- 🚧 hide nested items
 
 <!--
-- [x] decorate status emoji
-- [ ] hide nested items
+- [x] decorate status emojis
+- [>] propose a status change for parent tasks if their child ones have been completed
+- [>] hide nested items
 -->
