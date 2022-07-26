@@ -1,8 +1,11 @@
 use derive_new::new;
 
-use crate::task::{Task, TaskTree, TreeNode};
+use self::task::{TaskTree, TreeNode};
 
-pub mod emojinize;
+pub mod task;
+pub mod treatment {
+    pub mod emojinize;
+}
 
 pub trait Treatment {
     fn treat(tree: TaskTree) -> TaskTree;

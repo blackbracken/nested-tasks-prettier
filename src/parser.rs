@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use derive_new::new;
 
-use crate::task::{Status, Task, TaskTree, TreeNode};
+use crate::kernel::task::{Status, Task, TaskTree, TreeNode};
 
 #[derive(PartialEq, Eq, Debug, new)]
 pub struct RawNode {

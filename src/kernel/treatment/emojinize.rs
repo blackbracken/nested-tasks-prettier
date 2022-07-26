@@ -1,5 +1,4 @@
-use super::Treatment;
-use crate::task::TaskTree;
+use crate::kernel::{task::TaskTree, Treatment};
 
 pub struct Emojinize {}
 

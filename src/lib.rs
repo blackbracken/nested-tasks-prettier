@@ -5,10 +5,9 @@ use crate::{
     prettier::pretty_tree,
 };
 
+pub mod kernel;
 pub mod parser;
 pub mod prettier;
-pub mod task;
-pub mod treatment;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum PrettyFlag {
