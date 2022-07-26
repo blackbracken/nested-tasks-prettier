@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use derive_new::new;
 
-use crate::kernel::task::{Status, Task, Tree, TreeNode};
+use crate::kernel::tree::{Status, NodeContent, Tree, Node};
 
 #[derive(PartialEq, Eq, Debug, new)]
 pub struct RawNode {
@@ -57,8 +57,8 @@ pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> Tree {
 }
 
 // TODO: replace with functional combinators
-fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<TreeNode> {
-    let mut partial_tree: Vec<TreeNode> = vec![];
+fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<Node> {
+    let mut partial_tree: Vec<Node> = vec![];
 
     loop {
         let root = match deque.front() {
@@ -68,7 +68,7 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<Tr
                 let depth = popped.depth();
                 let task = parse_task(popped.text);
 
-                Some(TreeNode::new_leaf(depth, task))
+                Some(Node::new_leaf(depth, task))
             }
             Some(peeked) if peeked.depth() == current_depth + 1 => {
                 let children = parse_below_nodes(current_depth + 1, deque);
@@ -88,7 +88,7 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<Tr
 }
 
 const PREFIX_LENGTH: usize = 5;
-fn parse_task(raw_text: String) -> Task {
+fn parse_task(raw_text: String) -> NodeContent {
     let prefix = raw_text.chars().take(PREFIX_LENGTH).collect::<String>();
 
     let status = *Status::all()
@@ -96,8 +96,8 @@ fn parse_task(raw_text: String) -> Task {
         .find(|s| prefix == format!("- [{}]", s.ascii()))
         .unwrap();
 
-    Task {
-        content: raw_text.chars().skip(PREFIX_LENGTH + 1).collect(),
+    NodeContent {
+        label: raw_text.chars().skip(PREFIX_LENGTH + 1).collect(),
         status,
     }
 }
@@ -140,7 +140,7 @@ mod tests {
         "🚧あいうえおかきくけこさしすせそたちつてと"
     )]
     fn test_make_task_content(text: &str, expected: &str) {
-        let content = parse_task(text.to_owned()).content;
+        let content = parse_task(text.to_owned()).label;
 
         assert_eq!(content, expected)
     }

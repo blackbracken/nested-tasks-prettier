@@ -1,4 +1,4 @@
-use crate::kernel::{task::Tree, Treatment};
+use crate::kernel::{tree::Tree, Treatment};
 
 pub struct Emojinize {}
 

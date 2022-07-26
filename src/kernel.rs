@@ -1,8 +1,8 @@
 use derive_new::new;
 
-use self::task::{Tree, TreeNode};
+use self::tree::{Tree, Node};
 
-pub mod task;
+pub mod tree;
 pub mod treatment {
     pub mod emojinize;
 }
@@ -12,13 +12,13 @@ pub trait Treatment {
 }
 
 #[derive(new)]
-struct EachNodeTreatment<F: FnOnce(TreeNode) -> TreeNode> {
+struct EachNodeTreatment<F: FnOnce(Node) -> Node> {
     pub treat_each_node: F,
 }
 
 impl<F> Treatment for EachNodeTreatment<F>
 where
-    F: FnOnce(TreeNode) -> TreeNode,
+    F: FnOnce(Node) -> Node,
 {
     fn treat(tree: Tree) -> Tree {
         tree

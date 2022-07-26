@@ -32,44 +32,44 @@ impl Status {
     }
 }
 
-pub type Tree = Vec<TreeNode>;
+pub type Tree = Vec<Node>;
 
 #[derive(Debug, Clone)]
-pub struct Task {
-    pub content: String,
+pub struct NodeContent {
+    pub label: String,
     pub status: Status,
 }
 
 #[derive(Debug, Clone, new)]
-pub enum TreeNode {
+pub enum Node {
     Branch {
         depth: u8,
-        task: Task,
-        children: Vec<TreeNode>,
+        task: NodeContent,
+        children: Vec<Node>,
     },
     Leaf {
         depth: u8,
-        task: Task,
+        task: NodeContent,
     },
 }
 
-impl TreeNode {
-    pub fn task(&self) -> &Task {
+impl Node {
+    pub fn task(&self) -> &NodeContent {
         match self {
-            TreeNode::Branch {
+            Node::Branch {
                 depth: _,
                 task,
                 children: _,
             } => task,
-            TreeNode::Leaf { depth: _, task } => task,
+            Node::Leaf { depth: _, task } => task,
         }
     }
 
-    pub fn add_children(self, mut nodes: Vec<TreeNode>) -> Self {
+    pub fn add_children(self, mut nodes: Vec<Node>) -> Self {
         let node = self;
 
         match node {
-            TreeNode::Branch {
+            Node::Branch {
                 depth,
                 task,
                 children,
@@ -77,13 +77,13 @@ impl TreeNode {
                 let mut v = children;
                 v.append(&mut nodes);
 
-                TreeNode::Branch {
+                Node::Branch {
                     depth,
                     task,
                     children: v,
                 }
             }
-            TreeNode::Leaf { depth, task } => TreeNode::Branch {
+            Node::Leaf { depth, task } => Node::Branch {
                 depth,
                 task,
                 children: nodes.clone(),
@@ -91,9 +91,9 @@ impl TreeNode {
         }
     }
 
-    pub fn children(&self) -> Option<&Vec<TreeNode>> {
+    pub fn children(&self) -> Option<&Vec<Node>> {
         match self {
-            TreeNode::Branch {
+            Node::Branch {
                 depth: _,
                 task: _,
                 children,
@@ -104,12 +104,12 @@ impl TreeNode {
 
     pub fn depth(&self) -> u8 {
         match &self {
-            TreeNode::Branch {
+            Node::Branch {
                 depth,
                 task: _,
                 children: _,
             } => *depth,
-            TreeNode::Leaf { depth, task: _ } => *depth,
+            Node::Leaf { depth, task: _ } => *depth,
         }
     }
 }

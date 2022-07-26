@@ -1,14 +1,14 @@
 // TODO: create struct
 
-use crate::kernel::task::{Tree, TreeNode};
+use crate::kernel::tree::{Tree, Node};
 
 pub fn pretty_tree(tree: Tree) -> Vec<String> {
     tree.iter().flat_map(pretty_node).collect()
 }
 
-fn pretty_node(node: &TreeNode) -> Vec<String> {
+fn pretty_node(node: &Node) -> Vec<String> {
     match node {
-        TreeNode::Branch { children, .. } => {
+        Node::Branch { children, .. } => {
             // TODO: consider to implement with only functional combinators
             let mut root = vec![pretty_node_once(node)];
             children
@@ -18,18 +18,18 @@ fn pretty_node(node: &TreeNode) -> Vec<String> {
 
             root
         }
-        TreeNode::Leaf { .. } => {
+        Node::Leaf { .. } => {
             vec![pretty_node_once(node)]
         }
     }
 }
 
-fn pretty_node_once(node: &TreeNode) -> String {
+fn pretty_node_once(node: &Node) -> String {
     let task = node.task();
     // TODO: newtype depth & spaces
     let tab = " ".repeat((2 * node.depth()).into());
 
-    format!("{}- {} {}", tab, task.status.emoji(), task.content)
+    format!("{}- {} {}", tab, task.status.emoji(), task.label)
 }
 
 #[cfg(test)]
