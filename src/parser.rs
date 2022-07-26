@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use derive_new::new;
 
-use crate::kernel::task::{Status, Task, TaskTree, TreeNode};
+use crate::kernel::task::{Status, Task, Tree, TreeNode};
 
 #[derive(PartialEq, Eq, Debug, new)]
 pub struct RawNode {
@@ -50,12 +50,10 @@ pub fn isolate_line(raw_text: String) -> RawNode {
     RawNode::new(depth, raw_text)
 }
 
-pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
+pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> Tree {
     let mut deque = VecDeque::from(raw_nodes);
     // TODO: deque -> seq
-    let nodes = parse_below_nodes(0, &mut deque);
-
-    TaskTree { nodes }
+    parse_below_nodes(0, &mut deque)
 }
 
 // TODO: replace with functional combinators

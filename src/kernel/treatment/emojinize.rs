@@ -1,9 +1,9 @@
-use crate::kernel::{task::TaskTree, Treatment};
+use crate::kernel::{task::Tree, Treatment};
 
 pub struct Emojinize {}
 
 impl Treatment for Emojinize {
-    fn treat(tree: TaskTree) -> TaskTree {
+    fn treat(tree: Tree) -> Tree {
         tree
     }
 }

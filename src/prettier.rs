@@ -1,9 +1,9 @@
 // TODO: create struct
 
-use crate::kernel::task::{TaskTree, TreeNode};
+use crate::kernel::task::{Tree, TreeNode};
 
-pub fn pretty_tree(tree: TaskTree) -> Vec<String> {
-    tree.nodes.iter().flat_map(pretty_node).collect()
+pub fn pretty_tree(tree: Tree) -> Vec<String> {
+    tree.iter().flat_map(pretty_node).collect()
 }
 
 fn pretty_node(node: &TreeNode) -> Vec<String> {

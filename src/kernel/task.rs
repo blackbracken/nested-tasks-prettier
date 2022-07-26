@@ -32,9 +32,7 @@ impl Status {
     }
 }
 
-pub struct TaskTree {
-    pub nodes: Vec<TreeNode>,
-}
+pub type Tree = Vec<TreeNode>;
 
 #[derive(Debug, Clone)]
 pub struct Task {
