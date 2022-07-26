@@ -28,6 +28,17 @@ $ pbpaste | nested-tasks-prettier | pbcopy
 - 📦 zzzzzz
 ```
 
+## System layer
+
+- ~/infra/
+  - main
+  - parser
+- adapter (~/)
+  - lib
+- ~/kernel/
+  - treatment (means app logic)
+  - tree
+
 ## Roadmap
 
 - ✅ decorate status emojis
