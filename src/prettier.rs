@@ -3,10 +3,7 @@ use crate::task::{TaskTree, TreeNode};
 // TODO: create struct
 
 pub fn pretty_tree(tree: TaskTree) -> Vec<String> {
-    tree.nodes
-        .iter()
-        .flat_map(pretty_node)
-        .collect()
+    tree.nodes.iter().flat_map(pretty_node).collect()
 }
 
 fn pretty_node(node: &TreeNode) -> Vec<String> {
@@ -37,7 +34,10 @@ fn pretty_node_once(node: &TreeNode) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parser::{assemble_tree, RawNode}, prettier::pretty_tree};
+    use crate::{
+        parser::{assemble_tree, RawNode},
+        prettier::pretty_tree,
+    };
 
     #[test]
     fn test_tree_pretty() {

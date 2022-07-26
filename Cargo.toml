@@ -1,10 +1,13 @@
 [package]
 name = "nested-tasks-prettier"
+description = "A cli tool to pretty checkbox bullets which like markdown notation."
 version = "0.1.0"
+authors = ["blackbracken <me@bracken.black>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 derive-new = "0.5.9"
+seahorse = "2.1.0"
 test-case = "2.2.1"

@@ -1,21 +1,27 @@
+use std::collections::HashSet;
+use std::env;
 use std::io::{self, BufRead};
 
-use nested_tasks_prettier::{
-    parser::{assemble_tree, isolate_line},
-    prettier::pretty_tree,
-};
+use nested_tasks_prettier::{pretty, Param};
+
+use seahorse::{App, Context};
 
 fn main() {
+    App::new(env!("CARGO_PKG_NAME"))
+        .description(env!("CARGO_PKG_DESCRIPTION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .action(pretty_command)
+        .run(env::args().collect());
+}
+
+fn pretty_command(_: &Context) {
     let input = read_lines();
-    let raw_nodes = input
-        .iter()
-        .map(|text| isolate_line(text.to_owned()))
-        .collect::<Vec<_>>();
+    let params: HashSet<Param> = vec![].into_iter().collect();
 
-    let tree = assemble_tree(raw_nodes);
+    let prettied = pretty(input, params);
 
-    let output = pretty_tree(tree).join("\n");
-    print!("{}", output);
+    print!("{}", prettied.join("\n"));
 }
 
 fn read_lines() -> Vec<String> {
