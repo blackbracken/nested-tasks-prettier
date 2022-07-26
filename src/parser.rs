@@ -47,7 +47,7 @@ pub fn isolate_line(raw_text: String) -> RawNode {
 
     let raw_text: String = raw_text.chars().skip(depth.into()).collect();
 
-    return RawNode::new(depth, raw_text);
+    RawNode::new(depth, raw_text)
 }
 
 pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
@@ -55,7 +55,7 @@ pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
     // TODO: deque -> seq
     let nodes = parse_below_nodes(0, &mut deque);
 
-    return TaskTree { nodes };
+    TaskTree { nodes }
 }
 
 // TODO: replace with functional combinators
@@ -93,11 +93,10 @@ const PREFIX_LENGTH: usize = 5;
 fn parse_task(raw_text: String) -> Task {
     let prefix = raw_text.chars().take(PREFIX_LENGTH).collect::<String>();
 
-    let status = Status::all()
+    let status = *Status::all()
         .iter()
         .find(|s| prefix == format!("- [{}]", s.ascii()))
-        .unwrap()
-        .clone();
+        .unwrap();
 
     Task {
         content: raw_text.chars().skip(PREFIX_LENGTH + 1).collect(),

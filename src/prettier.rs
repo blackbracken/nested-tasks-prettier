@@ -5,7 +5,7 @@ use crate::task::{TaskTree, TreeNode};
 pub fn pretty_tree(tree: TaskTree) -> Vec<String> {
     tree.nodes
         .iter()
-        .flat_map(|node| pretty_node(node))
+        .flat_map(pretty_node)
         .collect()
 }
 
@@ -16,8 +16,7 @@ fn pretty_node(node: &TreeNode) -> Vec<String> {
             let mut root = vec![pretty_node_once(node)];
             children
                 .iter()
-                .map(|child| pretty_node(child))
-                .flatten()
+                .flat_map(pretty_node)
                 .for_each(|child| root.push(child));
 
             root
