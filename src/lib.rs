@@ -8,11 +8,27 @@ use crate::{
 pub mod parser;
 pub mod prettier;
 pub mod task;
+pub mod treatment;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub enum Param {}
+pub enum PrettyFlag {
+    HideDetails { depth: u8 },
+}
 
-pub fn pretty(input: Vec<String>, _: HashSet<Param>) -> Vec<String> {
+impl PrettyFlag {
+    fn priority(&self) -> FlagPriority {
+        match self {
+            PrettyFlag::HideDetails { .. } => FlagPriority::Innocuity,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, PartialOrd)]
+pub enum FlagPriority {
+    Innocuity,
+}
+
+pub fn pretty(input: Vec<String>, _: HashSet<PrettyFlag>) -> Vec<String> {
     let raw_nodes = input
         .iter()
         .map(|text| isolate_line(text.to_owned()))

@@ -4,7 +4,7 @@ use std::{
     io::{self, BufRead},
 };
 
-use nested_tasks_prettier::{pretty, Param};
+use nested_tasks_prettier::{pretty, PrettyFlag};
 use seahorse::{App, Context};
 
 fn main() {
@@ -18,7 +18,7 @@ fn main() {
 
 fn pretty_command(_: &Context) {
     let input = read_lines();
-    let params: HashSet<Param> = vec![].into_iter().collect();
+    let params: HashSet<PrettyFlag> = vec![].into_iter().collect();
 
     let prettied = pretty(input, params);
 

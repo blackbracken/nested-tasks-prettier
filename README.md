@@ -36,7 +36,7 @@ $ pbpaste | nested-tasks-prettier | pbcopy
 - adapter (~/)
   - lib
 - ~/kernel/
-  - treatment (means app logic)
+  - treatment (represents actual app logic)
   - tree
 
 ## Roadmap
