@@ -66,7 +66,7 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<No
                 let popped = deque.pop_front().unwrap();
 
                 let depth = popped.depth();
-                let content = parse_task(popped.text);
+                let content = parse_content(popped.text);
 
                 Some(Node::new_leaf(depth, content))
             }
@@ -88,7 +88,7 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<No
 }
 
 const PREFIX_LENGTH: usize = 5;
-fn parse_task(raw_text: String) -> NodeContent {
+fn parse_content(raw_text: String) -> NodeContent {
     let prefix = raw_text.chars().take(PREFIX_LENGTH).collect::<String>();
 
     let status = *Status::all()
@@ -121,16 +121,16 @@ mod tests {
     #[test_case("- [-] pending", '-')]
     #[test_case("- [>] doing", '>')]
     #[test_case("- [ ] new", ' ')]
-    fn test_make_task_status_success(text: &str, expected: char) {
-        let status = parse_task(text.to_owned()).status;
+    fn test_make_content_status_success(text: &str, expected: char) {
+        let status = parse_content(text.to_owned()).status;
 
         assert_eq!(status.ascii(), expected);
     }
 
     #[test]
     #[should_panic]
-    fn test_make_task_status_failure() {
-        parse_task("- [?] unknown".to_owned());
+    fn test_make_content_status_failure() {
+        parse_content("- [?] unknown".to_owned());
     }
 
     #[test_case("- [x] aaa", "aaa")]
@@ -139,8 +139,8 @@ mod tests {
         "- [x] 🚧あいうえおかきくけこさしすせそたちつてと",
         "🚧あいうえおかきくけこさしすせそたちつてと"
     )]
-    fn test_make_task_content(text: &str, expected: &str) {
-        let content = parse_task(text.to_owned()).label;
+    fn test_make_content(text: &str, expected: &str) {
+        let content = parse_content(text.to_owned()).label;
 
         assert_eq!(content, expected)
     }
@@ -149,7 +149,7 @@ mod tests {
     fn test_assemble_tree_empty() {
         let tree = assemble_tree(vec![]);
 
-        assert!(tree.nodes.is_empty());
+        assert!(tree.is_empty());
     }
 
     #[test]
@@ -167,12 +167,11 @@ mod tests {
 
         let tree = assemble_tree(raw_nodes);
 
-        let nodes = tree.nodes;
-        assert_eq!(nodes.len(), 2);
+        assert_eq!(tree.len(), 2);
 
         // [0 -> [...], 0]
         //  ^
-        let nested = nodes.get(0).unwrap();
+        let nested = tree.get(0).unwrap();
         assert_eq!(nested.depth(), 0);
         assert!(matches!(nested.children(), Some(children) if children.len() == 3));
 
