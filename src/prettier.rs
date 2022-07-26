@@ -1,6 +1,6 @@
 // TODO: create struct
 
-use crate::kernel::tree::{Tree, Node};
+use crate::kernel::tree::{Node, Tree};
 
 pub fn pretty_tree(tree: Tree) -> Vec<String> {
     tree.iter().flat_map(pretty_node).collect()
@@ -25,11 +25,11 @@ fn pretty_node(node: &Node) -> Vec<String> {
 }
 
 fn pretty_node_once(node: &Node) -> String {
-    let task = node.task();
+    let content = node.content();
     // TODO: newtype depth & spaces
     let tab = " ".repeat((2 * node.depth()).into());
 
-    format!("{}- {} {}", tab, task.status.emoji(), task.label)
+    format!("{}- {} {}", tab, content.status.emoji(), content.label)
 }
 
 #[cfg(test)]

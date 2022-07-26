@@ -1,6 +1,6 @@
 use derive_new::new;
 
-use self::tree::{Tree, Node};
+use self::tree::{Node, Tree};
 
 pub mod tree;
 pub mod treatment {

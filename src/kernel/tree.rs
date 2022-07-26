@@ -44,24 +44,24 @@ pub struct NodeContent {
 pub enum Node {
     Branch {
         depth: u8,
-        task: NodeContent,
+        content: NodeContent,
         children: Vec<Node>,
     },
     Leaf {
         depth: u8,
-        task: NodeContent,
+        content: NodeContent,
     },
 }
 
 impl Node {
-    pub fn task(&self) -> &NodeContent {
+    pub fn content(&self) -> &NodeContent {
         match self {
             Node::Branch {
                 depth: _,
-                task,
+                content,
                 children: _,
-            } => task,
-            Node::Leaf { depth: _, task } => task,
+            } => content,
+            Node::Leaf { depth: _, content } => content,
         }
     }
 
@@ -71,7 +71,7 @@ impl Node {
         match node {
             Node::Branch {
                 depth,
-                task,
+                content,
                 children,
             } => {
                 let mut v = children;
@@ -79,13 +79,13 @@ impl Node {
 
                 Node::Branch {
                     depth,
-                    task,
+                    content,
                     children: v,
                 }
             }
-            Node::Leaf { depth, task } => Node::Branch {
+            Node::Leaf { depth, content } => Node::Branch {
                 depth,
-                task,
+                content,
                 children: nodes.clone(),
             },
         }
@@ -95,7 +95,7 @@ impl Node {
         match self {
             Node::Branch {
                 depth: _,
-                task: _,
+                content: _,
                 children,
             } => Some(children),
             _ => None,
@@ -106,10 +106,10 @@ impl Node {
         match &self {
             Node::Branch {
                 depth,
-                task: _,
+                content: _,
                 children: _,
             } => *depth,
-            Node::Leaf { depth, task: _ } => *depth,
+            Node::Leaf { depth, content: _ } => *depth,
         }
     }
 }

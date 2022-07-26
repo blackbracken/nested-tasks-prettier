@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use derive_new::new;
 
-use crate::kernel::tree::{Status, NodeContent, Tree, Node};
+use crate::kernel::tree::{Node, NodeContent, Status, Tree};
 
 #[derive(PartialEq, Eq, Debug, new)]
 pub struct RawNode {
@@ -66,9 +66,9 @@ fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<No
                 let popped = deque.pop_front().unwrap();
 
                 let depth = popped.depth();
-                let task = parse_task(popped.text);
+                let content = parse_task(popped.text);
 
-                Some(Node::new_leaf(depth, task))
+                Some(Node::new_leaf(depth, content))
             }
             Some(peeked) if peeked.depth() == current_depth + 1 => {
                 let children = parse_below_nodes(current_depth + 1, deque);
