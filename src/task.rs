@@ -1,3 +1,5 @@
+use derive_new::new;
+
 #[derive(Debug, Clone, Copy)]
 pub enum Status {
     Done,
@@ -40,7 +42,7 @@ pub struct Task {
     pub status: Status,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, new)]
 pub enum TreeNode {
     Branch {
         depth: u8,

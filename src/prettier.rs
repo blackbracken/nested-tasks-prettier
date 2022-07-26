@@ -1,56 +1,55 @@
 use crate::task::{TaskTree, TreeNode};
 
-impl TaskTree {
-    pub fn pretty(&self) -> Vec<String> {
-        self.nodes.iter().flat_map(|node| node.pretty()).collect()
+// TODO: create struct
+
+pub fn pretty_tree(tree: TaskTree) -> Vec<String> {
+    tree.nodes
+        .iter()
+        .flat_map(|node| pretty_node(node))
+        .collect()
+}
+
+fn pretty_node(node: &TreeNode) -> Vec<String> {
+    match node {
+        TreeNode::Branch { children, .. } => {
+            // TODO: consider to implement with only functional combinators
+            let mut root = vec![pretty_node_once(node)];
+            children
+                .iter()
+                .map(|child| pretty_node(child))
+                .flatten()
+                .for_each(|child| root.push(child));
+
+            root
+        }
+        TreeNode::Leaf { .. } => {
+            vec![pretty_node_once(node)]
+        }
     }
 }
 
-impl TreeNode {
-    fn pretty(&self) -> Vec<String> {
-        match self {
-            TreeNode::Branch {
-                depth: _,
-                task: _,
-                children,
-            } => {
-                let mut v = vec![self.pretty_single()];
-                children
-                    .iter()
-                    .map(|child| child.pretty())
-                    .flatten()
-                    .for_each(|child| v.push(child));
+fn pretty_node_once(node: &TreeNode) -> String {
+    let task = node.task();
+    // TODO: newtype depth & spaces
+    let tab = " ".repeat((2 * node.depth()).into());
 
-                v
-            }
-            TreeNode::Leaf { depth: _, task: _ } => {
-                vec![self.pretty_single()]
-            }
-        }
-    }
-
-    fn pretty_single(&self) -> String {
-        let task = self.task();
-
-        let tab = " ".repeat(self.depth().into());
-        format!("{}- {} {}", tab, task.status.emoji(), task.content)
-    }
+    format!("{}- {} {}", tab, task.status.emoji(), task.content)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::assemble_tree;
+    use crate::{parser::{assemble_tree, RawNode}, prettier::pretty_tree};
 
     #[test]
     fn test_tree_pretty() {
         let raw_nodes = vec![
-            (0, "- [x] 1".to_owned()),
-            (0, "- [x] 2".to_owned()),
-            (2, "- [x] 2-1".to_owned()),
-            (2, "- [-] 2-2".to_owned()),
-            (2, "- [>] 2-3".to_owned()),
-            (4, "- [ ] 2-3-1".to_owned()),
-            (0, "- [>] 3".to_owned()),
+            RawNode::new(0, "- [x] 1".to_owned()),
+            RawNode::new(0, "- [x] 2".to_owned()),
+            RawNode::new(2, "- [x] 2-1".to_owned()),
+            RawNode::new(2, "- [-] 2-2".to_owned()),
+            RawNode::new(2, "- [>] 2-3".to_owned()),
+            RawNode::new(4, "- [ ] 2-3-1".to_owned()),
+            RawNode::new(0, "- [>] 3".to_owned()),
         ];
         let tree = assemble_tree(raw_nodes);
 
@@ -67,7 +66,7 @@ mod tests {
         .filter(|line| !line.is_empty())
         .collect::<Vec<_>>();
 
-        let actual = tree.pretty();
+        let actual = pretty_tree(tree);
 
         assert_eq!(expected, actual);
     }

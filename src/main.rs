@@ -1,6 +1,9 @@
 use std::io::{self, BufRead};
 
-use nested_tasks_prettier::parser::{assemble_tree, isolate_line};
+use nested_tasks_prettier::{
+    parser::{assemble_tree, isolate_line},
+    prettier::pretty_tree,
+};
 
 fn main() {
     let input = read_lines();
@@ -11,7 +14,7 @@ fn main() {
 
     let tree = assemble_tree(raw_nodes);
 
-    let output = tree.pretty().join("\n");
+    let output = pretty_tree(tree).join("\n");
     print!("{}", output);
 }
 

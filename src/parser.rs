@@ -1,8 +1,20 @@
 use std::collections::VecDeque;
 
+use derive_new::new;
+
 use crate::task::{Status, Task, TaskTree, TreeNode};
 
-pub type RawNode = (u8, String);
+#[derive(PartialEq, Eq, Debug, new)]
+pub struct RawNode {
+    spaces: u8,
+    text: String,
+}
+
+impl RawNode {
+    fn depth(&self) -> u8 {
+        self.spaces / 2
+    }
+}
 
 enum HeadSpaceCount {
     UntilSpaces(u8),
@@ -35,43 +47,50 @@ pub fn isolate_line(raw_text: String) -> RawNode {
 
     let raw_text: String = raw_text.chars().skip(depth.into()).collect();
 
-    return (depth, raw_text);
+    return RawNode::new(depth, raw_text);
 }
 
 pub fn assemble_tree(raw_nodes: Vec<RawNode>) -> TaskTree {
     let mut deque = VecDeque::from(raw_nodes);
+    // TODO: deque -> seq
     let nodes = parse_below_nodes(0, &mut deque);
 
     return TaskTree { nodes };
 }
 
-fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<(u8, String)>) -> Vec<TreeNode> {
-    let mut nodes: Vec<TreeNode> = vec![];
+// TODO: replace with functional combinators
+fn parse_below_nodes(current_depth: u8, deque: &mut VecDeque<RawNode>) -> Vec<TreeNode> {
+    let mut partial_tree: Vec<TreeNode> = vec![];
 
     loop {
-        match deque.front() {
-            Some((depth, _)) if *depth == current_depth => {
-                let depth = *depth;
-                let (_, text) = deque.pop_front().unwrap();
+        let root = match deque.front() {
+            Some(peeked) if peeked.depth() == current_depth => {
+                let popped = deque.pop_front().unwrap();
 
-                // 多重責務になるのでここで作成しない方が良い
-                let task = make_task(text);
+                let depth = popped.depth();
+                let task = parse_task(popped.text);
 
-                nodes.push(TreeNode::Leaf { depth, task });
+                Some(TreeNode::new_leaf(depth, task))
             }
-            Some((depth, _)) if *depth == current_depth + 2 => {
-                let children = parse_below_nodes(current_depth + 2, deque);
-                let appended = nodes.pop().unwrap().add_children(children);
+            Some(peeked) if peeked.depth() == current_depth + 1 => {
+                let children = parse_below_nodes(current_depth + 1, deque);
+                let parent = partial_tree.pop().unwrap().add_children(children);
 
-                nodes.push(appended);
+                Some(parent)
             }
-            _ => return nodes,
-        }
+            _ => None,
+        };
+
+        if let Some(root) = root {
+            partial_tree.push(root);
+        } else {
+            return partial_tree;
+        };
     }
 }
 
 const PREFIX_LENGTH: usize = 5;
-fn make_task(raw_text: String) -> Task {
+fn parse_task(raw_text: String) -> Task {
     let prefix = raw_text.chars().take(PREFIX_LENGTH).collect::<String>();
 
     let status = Status::all()
@@ -91,9 +110,9 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    #[test_case("zero", (0, String::from("zero")))]
-    #[test_case("  tabbed", (2, String::from("tabbed")))]
-    #[test_case("  tabbed spaces", (2, String::from("tabbed spaces")))]
+    #[test_case("zero", RawNode::new(0, String::from("zero")))]
+    #[test_case("  tabbed", RawNode::new(2, String::from("tabbed")))]
+    #[test_case("  tabbed spaces", RawNode::new(2, String::from("tabbed spaces")))]
     fn test_isolate_line(text: &str, expected: RawNode) {
         let actual = isolate_line(text.to_owned());
 
@@ -105,7 +124,7 @@ mod tests {
     #[test_case("- [>] doing", '>')]
     #[test_case("- [ ] new", ' ')]
     fn test_make_task_status_success(text: &str, expected: char) {
-        let status = make_task(text.to_owned()).status;
+        let status = parse_task(text.to_owned()).status;
 
         assert_eq!(status.ascii(), expected);
     }
@@ -113,7 +132,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_make_task_status_failure() {
-        make_task("- [?] unknown".to_owned());
+        parse_task("- [?] unknown".to_owned());
     }
 
     #[test_case("- [x] aaa", "aaa")]
@@ -123,7 +142,7 @@ mod tests {
         "🚧あいうえおかきくけこさしすせそたちつてと"
     )]
     fn test_make_task_content(text: &str, expected: &str) {
-        let content = make_task(text.to_owned()).content;
+        let content = parse_task(text.to_owned()).content;
 
         assert_eq!(content, expected)
     }
@@ -138,14 +157,14 @@ mod tests {
     #[test]
     fn test_assemble_tree_nested() {
         let raw_nodes = vec![
-            (0, "- [ ] 0".to_owned()),
-            (2, "- [ ] 2".to_owned()),
-            (2, "- [ ] 2".to_owned()),
-            (4, "- [ ] 4".to_owned()),
-            (4, "- [ ] 4".to_owned()),
-            (6, "- [ ] 6".to_owned()),
-            (2, "- [ ] 2".to_owned()),
-            (0, "- [ ] 0".to_owned()),
+            RawNode::new(0, "- [ ] 0".to_owned()),
+            RawNode::new(2, "- [ ] 2".to_owned()),
+            RawNode::new(2, "- [ ] 2".to_owned()),
+            RawNode::new(4, "- [ ] 4".to_owned()),
+            RawNode::new(4, "- [ ] 4".to_owned()),
+            RawNode::new(6, "- [ ] 6".to_owned()),
+            RawNode::new(2, "- [ ] 2".to_owned()),
+            RawNode::new(0, "- [ ] 0".to_owned()),
         ];
 
         let tree = assemble_tree(raw_nodes);
@@ -162,25 +181,25 @@ mod tests {
         // [0 -> [2, 2, 2], 0]
         //              ^
         let not_nested = nested.children().unwrap().get(2).unwrap();
-        assert_eq!(not_nested.depth(), 2);
+        assert_eq!(not_nested.depth(), 1);
         assert!(matches!(not_nested.children(), None));
 
         // [0 -> [2, 2 -> [...], 2], 0]
         //           ^
         let nested = nested.children().unwrap().get(1).unwrap();
-        assert_eq!(nested.depth(), 2);
+        assert_eq!(nested.depth(), 1);
         assert!(matches!(nested.children(), Some(children) if children.len() == 2));
 
         // [0 -> [2, 2 -> [4, 4 -> [...]], 2], 0]
         //                    ^
         let nested = nested.children().unwrap().get(1).unwrap();
-        assert_eq!(nested.depth(), 4);
+        assert_eq!(nested.depth(), 2);
         assert!(matches!(nested.children(), Some(children) if children.len() == 1));
 
         // [0 -> [2, 2 -> [4, 4 -> [6]], 2], 0]
         //                          ^
         let nested = nested.children().unwrap().get(0).unwrap();
-        assert_eq!(nested.depth(), 6);
+        assert_eq!(nested.depth(), 3);
         assert!(matches!(nested.children(), None));
     }
 }
