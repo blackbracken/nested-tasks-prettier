@@ -1,16 +1,16 @@
 # nested-tasks-prettier
 
-[WIP] / A cli tool to pretty checkbox bullets which like markdown notation.
+[WIP] A cli tool to pretty checkbox bullets which like markdown notation.
 
 ## How to use (C&P)
 
 ```shell
-$ pbpaste | ./nested-tasks-prettier | pbcopy
+$ pbpaste | nested-tasks-prettier | pbcopy
 ```
 
-## Example
+## Examples
 
-### Input
+### `$ nested-tasks-prettier`
 
 ```plain
 - [x] xxxxxx
@@ -19,8 +19,6 @@ $ pbpaste | ./nested-tasks-prettier | pbcopy
   - [>] bbbbb
 - [ ] zzzzzz
 ```
-
-### Output
 
 ```plain
 - ✅ xxxxxx
@@ -33,11 +31,11 @@ $ pbpaste | ./nested-tasks-prettier | pbcopy
 ## Roadmap
 
 - ✅ decorate status emojis
-- 🚧 propose a status change for parent tasks if their child ones have been completed
-- 🚧 hide nested items
+- 🚧 hide and count nested items
+- 📦 propose a status change for parent tasks if their child ones have been completed
 
 <!--
 - [x] decorate status emojis
-- [>] propose a status change for parent tasks if their child ones have been completed
-- [>] hide nested items
+- [>] hide and count nested items
+- [ ] propose a status change for parent tasks if their child ones have been completed
 -->
