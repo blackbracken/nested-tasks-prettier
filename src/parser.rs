@@ -106,8 +106,9 @@ fn parse_task(raw_text: String) -> Task {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use test_case::test_case;
+
+    use super::*;
 
     #[test_case("zero", RawNode::new(0, String::from("zero")))]
     #[test_case("  tabbed", RawNode::new(2, String::from("tabbed")))]

@@ -1,9 +1,10 @@
-use std::collections::HashSet;
-use std::env;
-use std::io::{self, BufRead};
+use std::{
+    collections::HashSet,
+    env,
+    io::{self, BufRead},
+};
 
 use nested_tasks_prettier::{pretty, Param};
-
 use seahorse::{App, Context};
 
 fn main() {
