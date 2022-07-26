@@ -18,9 +18,9 @@ fn main() {
 
 fn pretty_command(_: &Context) {
     let input = read_lines();
-    let params: HashSet<PrettyFlag> = vec![].into_iter().collect();
+    let flags: HashSet<PrettyFlag> = vec![].into_iter().collect();
 
-    let prettied = pretty(input, params);
+    let prettied = pretty(input, flags);
 
     print!("{}", prettied.join("\n"));
 }

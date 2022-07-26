@@ -56,12 +56,8 @@ pub enum Node {
 impl Node {
     pub fn content(&self) -> &NodeContent {
         match self {
-            Node::Branch {
-                depth: _,
-                content,
-                children: _,
-            } => content,
-            Node::Leaf { depth: _, content } => content,
+            Node::Branch { content, .. } => content,
+            Node::Leaf { content, .. } => content,
         }
     }
 
@@ -93,23 +89,15 @@ impl Node {
 
     pub fn children(&self) -> Option<&Vec<Node>> {
         match self {
-            Node::Branch {
-                depth: _,
-                content: _,
-                children,
-            } => Some(children),
+            Node::Branch { children, .. } => Some(children),
             _ => None,
         }
     }
 
     pub fn depth(&self) -> u8 {
         match &self {
-            Node::Branch {
-                depth,
-                content: _,
-                children: _,
-            } => *depth,
-            Node::Leaf { depth, content: _ } => *depth,
+            Node::Branch { depth, .. } => *depth,
+            Node::Leaf { depth, .. } => *depth,
         }
     }
 }
